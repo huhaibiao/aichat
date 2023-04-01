@@ -1,4 +1,4 @@
 dist
-node_module
 
 *DS
+node_modules

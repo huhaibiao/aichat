@@ -27,7 +27,7 @@ const submit =
         await formEl.validate((valid, fields) => {
             if (valid) {
                 //@ts-ignore
-                if (__APP_ENV__==='development'||(ruleForm.username==='huhaibiao'&&ruleForm.username==='2023')) {
+                if (__APP_ENV__==='development'||(ruleForm.username==='huhaibiao'&&ruleForm.username+''==='2023')) {
                     return  loginHandle({success: true, data:{token:1, expiresIn: 20000}})
                 } 
                 // server.post('/auth/login', ruleForm).then(res => {
