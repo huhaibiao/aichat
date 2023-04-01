@@ -61,7 +61,7 @@ const loginHandle = (res) => {
 <template>
     <div class="login-box">
         <div class="login-title">
-            ai market登录
+            ai chat登录
         </div>
         <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules" style="width: 100%;">
             <el-form-item prop="username">
