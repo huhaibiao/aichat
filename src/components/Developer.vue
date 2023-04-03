@@ -1,5 +1,11 @@
+<!--
+ * @Author: huhaibiao huhaibiao@do-global.com
+ * @Date: 2023-03-29 15:35:57
+ * @Description: 
+-->
 <script setup>
 import { reactive, ref, toRef, watch } from 'vue'
+import {pendingCount} from './useRequest';
 
 const mode = ref(__APP_ENV__)
 
@@ -11,6 +17,8 @@ const mode = ref(__APP_ENV__)
 
     <!-- <div>ws连接状态：{{ Model.ws.readyState }}</div> -->
     <div>ws连接状态：{{  }}</div>
+
+    <div>正在请求中数：{{ pendingCount }}</div>
 </div>
 
 

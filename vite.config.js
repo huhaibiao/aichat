@@ -33,7 +33,8 @@ export default defineConfig(
     } else {
       outDir = await preBuild()
     }
-    const base = '/aichat/'
+    // const base = '/aichat/'
+    const base = './'
     return {
       plugins: [vue()],
       base,

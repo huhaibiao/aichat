@@ -3,6 +3,7 @@
  * @Date: 2023-03-29 15:36:34
  * @Description: 
  */
+import { getLocalStorage, saveLocalStorage } from './utils';
 // const OUT_WS_URL = 'ws://gptapi.jnnxtech.com/task-producer/chatgpt/chat/completions/websocket' //国外
 // let IN_WS_URL = 'ws://gptapi.jnnxtech.com/task-producer/chatgpt/chat/completions/websocket' //国内
 import axios from 'axios';
@@ -11,47 +12,33 @@ __APP_ENV__ && (IN_WS_URL = 'ws://localhost:8088/')
 if (location?.protocol.includes('https')) {
     IN_WS_URL = 'wss' + IN_WS_URL.slice(2)
 }
-let messages = [{ "role": "system", "content": "You are a professional front end assistant." }]
+const historyList = getLocalStorage()
+const x = historyList.findIndex((item) => {
+    return item == null
+})
+console.log("🚀 ~ file: websocketChat.js:20 ~ x ~ x:", x, historyList.length)
+if (x > 0) {
+    historyList.splice(x - 1, 2)
+    saveLocalStorage(historyList)
+}
+// historyList = historyList.splice(x - 1, 2)
+
+let tmp = [{ "role": "system", "content": "You are a professional front end assistant." }]
+historyList.forEach((item, index) => {
+    tmp = [...tmp, { role: "user", content: item.question }, { role: 'assistant', content: item.rep }]
+})
+export const chatTmpList = []
 export const postOpenAi = (request, socket) => {
-    let rep = ''
     console.log('🚀 ~ file: index.js:26 ~ postOpenAi ~ request:', request, 'time:' + new Date().toLocaleTimeString())
-    messages.push({ role: "user", content: request })
-    if (messages.length >= 7) {
-        messages.splice(1, 2);
-    }
-    const tmp = axios.post('https://api.openai.com/v1/chat/completions', {
-        model: 'gpt-3.5-turbo-0301',
-        messages,
-        temperature: 0,
-        n: 1,
-        user: 'user',
-        stream: true
-    }, {
-        headers: {
-            Authorization: `Bearer ${hhh_API_key.slice(0, -2)}`,
-            'Content-Type': 'application/json',
-            // responseType: 'stream'
-        },
-    }).then(response => {
-        console.log(111);
-        response.data.on('data', function (chunk) {
-            console.log("🚀 ~ file: websocketChat.js:33 ~ chunk:", chunk)
-            // 处理数据流
-        });
-        response.data.on('end', function () {
-            // 数据流接收完毕
-        });
+    let messages = tmp
+    chatTmpList.forEach((item, index) => {
+        messages = [...messages, { role: "user", content: item.question }, { role: 'assistant', content: item.rep }]
     })
-    // tmp.onmessage = function (event) { console.log(11); }
-
-    const url = 'https://api.openai.com/v1/completions?Authorization=' + `Bearer ${hhh_API_key.slice(0, -2)}`;
-    const source = new EventSource(url);
-    source.onmessage = function (event) {
-        const data = JSON.parse(event.data);
-        console.log("🚀 ~ file: websocketChat.js:49 ~ postOpenAi ~ data:", data)
-        // 处理返回的数据
-    };
-
+    messages.push({ role: "user", content: request })
+    const l = messages.length
+    if (l >= 7) {
+        messages.splice(1, l - 5);
+    }
     return axios.post('https://api.openai.com/v1/chat/completions', {
         model: 'gpt-3.5-turbo-0301',
         messages,
@@ -67,13 +54,6 @@ export const postOpenAi = (request, socket) => {
         // responseType: 'stream',
     }).then(response => {
         let data = response.data
-
-        // data.on('data', chunk => {
-        //     console.log(chunk.toString());
-        // })
-        // if (true) {
-        //     return
-        // }
         if (typeof data === "string") {
             data = JSON.parse(response.data)
         }
@@ -82,8 +62,11 @@ export const postOpenAi = (request, socket) => {
         messages.push({ role: "assistant", content: rep })
         return rep
     }).catch(er => {
+        const errData = er?.message
         console.log("🚀 ~ file: index.js:75 ~ postOpenAi ~ er:", er)
         console.log('post api请求出错');
+        // Promise.reject(errData)
+        throw new Error(errData)
     })
 }
 // postOpenAi('hello')

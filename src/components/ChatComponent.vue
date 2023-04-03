@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import RepLoading from './Loading.vue'
-import { ws, sendReq, handleFns, initWs, params, postOpenAi } from './websocketChat'
-import { bytesJudge } from './utils'
-import { onBeforeUnmount, onBeforeMount, onUnmounted, Ref, ref, onMounted } from 'vue'
+import { ws, sendReq, handleFns, initWs, params, postOpenAi, chatTmpList } from './websocketChat'
+import { bytesJudge, getLocalStorage, saveLocalStorage } from './utils'
+import { onBeforeUnmount, onBeforeMount, onUnmounted, Ref, ref, onMounted, reactive } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
+import { ElMessage } from 'element-plus'
+import { pendingCount, useActionRequest } from './useRequest'
 const emit = defineEmits(['JLogin'])
 emit('JLogin')
 
@@ -20,42 +22,59 @@ const textarea = ref('')
 /** 对话状态： 包括 0空闲中，1发送中和等待回复中，2回复中，0回复结束 */
 let STATUS = ref(0)
 let chatList = ref<string[]>([])
+const chatsList = reactive<any[]>([])
+
 const scrollToDom = ref(null)
 const qInoutEl = ref(null) as any
 
 let flat = true
 
 const submit = () => {
-  if (STATUS.value !== 0) return
+  // if (STATUS.value !== 0) return
   let aiReply = '',
     req = textarea.value
+  const chatItem = reactive({
+    question: '',
+    questionTime: '',
+    rep: '',
+    repTime: ''
+  })
+  chatItem.question = textarea.value
+  chatItem.questionTime = new Date().toLocaleString()
   textarea.value = ''
   if (!req.trim()) {
     return
   }
   STATUS.value = 1
   chatList.value = [...chatList.value, req, aiReply]
+  chatsList.push(chatItem)
   flat = true
   // sendReq(req)
-  postOpenAi(req).then(res => {
+  const postOpenAiPromise = postOpenAi(chatItem.question)
+  useActionRequest(postOpenAiPromise).then(res => {
     console.log('🚀 ~ file: ChatComponent.vue:42 ~ postOpenAi ~ res:', res)
     chatList.value[chatList.value.length - 1] = res
+    chatItem.rep = res
+    chatItem.repTime = new Date().toLocaleString()
+    chatTmpList.push(chatItem)
+    console.log('🚀 ~ file: ChatComponent.vue:59 ~ useActionRequest ~ chatItem:', JSON.stringify(chatItem))
     STATUS.value = 0
-    saveLocalStorage(chatList.value)
+    ElMessage({
+      message: '',
+      type: 'success'
+    })
+    saveLocalStorage(chatsList, 'chatsList')
   })
+
   setTimeout(() => {
     document.querySelector('.chat-item-scrollTo')!.scrollIntoView({ behavior: 'auto', block: 'end', inline: 'nearest' })
   })
 }
 
 onBeforeMount(() => {
-  const localS = getLocalStorage()
-  if (!localS) {
-    ;(chatList as any) = null
-    chatList = ref<string[]>([])
-  } else {
-    chatList.value = localS
-  }
+  // chatList.value = getLocalStorage()
+  chatsList.push(...getLocalStorage())
+  console.log('🚀 ~ file: ChatComponent.vue:76 ~ onBeforeMount ~ chatsList:', chatsList)
 })
 
 onBeforeUnmount(() => {
@@ -131,37 +150,6 @@ const reInit = () => {
   STATUS.value = 0
 }
 
-/** 去掉最早的历史对话数据 2个2个去掉循环判断是否有剩余数据可以存储了*/
-const deletedChatData = (params: string[] = []) => {
-  const jsonString = JSON.stringify(params)
-  if (bytesJudge(jsonString)) {
-    params.shift()
-    params.shift()
-    if (bytesJudge(JSON.stringify(params))) {
-      deletedChatData(params)
-    }
-  } else {
-    return
-  }
-}
-
-/**本地存储对话数据 */
-const saveLocalStorage = (params: string[] = []) => {
-  deletedChatData(params)
-  const key = 'chat-list'
-  try {
-    localStorage.setItem(key, JSON.stringify(params))
-  } catch (error) {
-    console.error('本地存储数据时出错：', error)
-  }
-}
-
-/** 获取本地存储数据 */
-const getLocalStorage = () => {
-  const key = 'chat-list'
-  return JSON.parse(localStorage.getItem(key)!)
-}
-
 /**转译html */
 const Translation = (params = '') => {
   let res
@@ -231,33 +219,27 @@ handleFns.openHandle = () => {
 
 <template>
   <div class="chat-list">
-    <div
-      class="chat-item"
-      :class="{ 'chat-item-user': index % 2 === 0 }"
-      v-for="(item, index) of chatList"
-      :key="index"
-    >
-      <template v-if="index % 2 === 0">
-        <div class="chat-item-rep mr-10 user">{{ item }}</div>
+    <div v-for="(item, index) of chatsList" :key="index">
+      <div class="chat-item chat-item-user">
+        <div class="chat-item-rep mr-10 user">{{ item.question }}</div>
         <div class="me square">我</div>
-      </template>
-
-      <template v-else>
+      </div>
+      <div class="chat-item">
         <div class="square">ai</div>
         <div class="chat-item-rep ml-10">
-          <RepLoading v-if="index === chatList.length - 1 && STATUS === 1" />
+          <RepLoading v-if="!item.rep" />
           <span>
-            {{ item }}<span :class="{ 'rep-light-cursor': index === chatList.length - 1 && STATUS === 2 }"></span
+            {{ item.rep }}<span :class="{ 'rep-light-cursor': index === chatList.length - 1 && STATUS === 2 }"></span
           ></span>
         </div>
-      </template>
+      </div>
     </div>
 
     <div class="chat-item-scrollTo" ref="scrollToDom"></div>
   </div>
 
   <div class="submit-bottom">
-    <el-button type="danger" round class="doneRep" v-show="STATUS !== 0" @click="reInit">终止回答</el-button>
+    <el-button type="danger" round class="doneRep" v-show="pendingCount !== 0" @click="reInit">终止回答</el-button>
     <el-input
       ref="qInoutEl"
       class="do-scrollbar-b chat-input"
@@ -266,9 +248,11 @@ handleFns.openHandle = () => {
       type="textarea"
       placeholder="欢迎提问～"
     />
-    <el-button type="primary" class="ml-10 submit-btn" @click="submit" :disabled="STATUS !== 0"
-      >{{ STATUS !== 0 ? '回复中' : '提交' }}<el-icon class="is-loading" v-if="STATUS !== 0"> <Loading /> </el-icon
-    ></el-button>
+    <el-button type="primary" class="ml-10 submit-btn" @click="submit">
+      <!-- {{ STATUS !== 0 ? '回复中' : '提交' }} -->
+      {{ '提交' }}
+      <!-- <el-icon class="is-loading" v-if="STATUS !== 0"> <Loading /> </el-icon> -->
+    </el-button>
   </div>
 </template>
 
