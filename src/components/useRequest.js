@@ -3,7 +3,6 @@
  * @Date: 2023-04-02 22:34:03
  * @Description: 
  */
-import axios from "axios"
 import { ref } from "vue"
 
 const promises = []

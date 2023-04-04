@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import RepLoading from './Loading.vue'
-import { ws, sendReq, handleFns, initWs, params, postOpenAi, chatTmpList } from './websocketChat'
+import { ws, sendReq, handleFns, initWs, params } from './websocketChat'
 import { bytesJudge, getLocalStorage, saveLocalStorage } from './utils'
 import { onBeforeUnmount, onBeforeMount, onUnmounted, Ref, ref, onMounted, reactive } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { ElMessage } from 'element-plus'
 import { pendingCount, useActionRequest } from './useRequest'
+import { postOpenAi, chatTmpList } from './../axios/openaiApi'
 const emit = defineEmits(['JLogin'])
 emit('JLogin')
 
