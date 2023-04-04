@@ -30,7 +30,7 @@ historyList.forEach((item, index) => {
 export const chatTmpList = []
 export const postOpenAi = (request, socket) => {
   console.log('🚀 ~ file: index.js:26 ~ postOpenAi ~ request:', request, 'time:' + new Date().toLocaleTimeString())
-  let messages = JSON.stringify(tmp)
+  let messages = JSON.parse(JSON.stringify(tmp))
   chatTmpList.forEach((item, index) => {
     messages = [...messages, { role: 'user', content: item.question }, { role: 'assistant', content: item.rep }]
   })

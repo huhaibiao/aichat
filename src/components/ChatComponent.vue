@@ -25,7 +25,7 @@ let chatList = ref<string[]>([])
 const chatsList = reactive<any[]>([])
 
 const scrollToDom = ref(null)
-const qInoutEl = ref(null) as any
+const qInoutEl = ref(null) as unknown
 
 let flat = true
 

@@ -4,6 +4,7 @@ import ChatComponent from './components/ChatComponent.vue'
 import Login from './components/Login.vue';
 import Developer from './components/Developer.vue';
 import {JLogin} from './components/utils';
+import DownLoadChatsList from './components/DownLoadChatsList.vue';
 let login = ref(true)
 const isLogin = () => {
   login.value = JLogin()
@@ -13,6 +14,10 @@ isLogin()
 </script>
 
 <template>
+  <div class="exp-chat-list">
+    <DownLoadChatsList></DownLoadChatsList>
+  </div>
+
   <Developer />
 
   <div style="width: 100%; height: 100%" class="chat-component" v-if="!login">
@@ -32,6 +37,18 @@ isLogin()
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.exp-chat-list{
+  position: fixed;
+  z-index: 11;
+  top: 5px;
+  right: 20px;
+  // width: 20px;
+  // height: 20px;
+  // display: flex;
+  // justify-content: center;
+
 }
 
 </style>
