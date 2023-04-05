@@ -10,9 +10,9 @@ import Login from './components/Login.vue'
 import Developer from './components/Developer.vue'
 import { JLogin } from './components/utils'
 import DownLoadChatsList from './components/DownLoadChatsList.vue'
-// import { defineAsyncComponent } from 'vue'
-
-// const ChatComponent = defineAsyncComponent(() => import('./components/ChatComponent.vue'))
+import { defineAsyncComponent } from 'vue'
+import HelpFilled from '~icons/ep/HelpFilled'
+const QuestList = defineAsyncComponent(() => import('./components/QuestList.vue'))
 // const Login = defineAsyncComponent(() => import('./components/Login.vue'))
 // const Developer = defineAsyncComponent(() => import('./components/Developer.vue'))
 
@@ -21,12 +21,30 @@ const isLogin = () => {
   login.value = JLogin()
 }
 isLogin()
+const chat = ref({})
+const dialogVisible = ref(false)
+
+const questListChange = (index, chatItem) => {
+  chat.value = chatItem
+  dialogVisible.value = true
+}
+
+const controlShow = ref(false)
+  
 </script>
 
 <template>
   <div class="exp-chat-list" v-if="!login">
-    <DownLoadChatsList></DownLoadChatsList>
+  <el-icon :size="30" style="margin: 10px " @click="controlShow=!controlShow">
+       <HelpFilled  />
+  </el-icon>
+    <DownLoadChatsList v-if="controlShow"></DownLoadChatsList>
+    <QuestList style="margin-top: 10px" @change="questListChange" v-if="controlShow"></QuestList>
   </div>
+
+  <el-dialog v-model="dialogVisible" :title="chat.question" width="80%">
+    <div style="white-space: pre-wrap">{{ chat.rep }}</div>
+  </el-dialog>
 
   <Developer />
 
@@ -50,12 +68,15 @@ isLogin()
 
 .exp-chat-list {
   position: fixed;
-  z-index: 11;
+  display: flex;
+  flex-direction: column;
+  z-index: 12;
   top: 5px;
   right: 20px;
   // width: 20px;
   // height: 20px;
   // display: flex;
-  // justify-content: center;
+  justify-content: center;
+  align-items: end;
 }
 </style>

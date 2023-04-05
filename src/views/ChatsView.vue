@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import RepLoading from './Loading.vue'
 import { ws, sendReq, handleFns, initWs, params } from './websocketChat'
-import { bytesJudge, formatCommentTime, getLocalStorage, saveLocalStorage } from './utils'
+import { bytesJudge, getLocalStorage, saveLocalStorage } from './utils'
 import { onBeforeUnmount, onBeforeMount, onUnmounted, Ref, ref, onMounted, reactive } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { ElMessage } from 'element-plus'
@@ -221,14 +221,11 @@ handleFns.openHandle = () => {
 <template>
   <div class="chat-list">
     <div v-for="(item, index) of chatsList" :key="index">
-      <div class="chat-item chat-item-user" style="position: relative">
+      <div class="chat-item chat-item-user">
         <div class="chat-item-rep mr-10 user">{{ item.question }}</div>
         <div class="me square">我</div>
-        <div class="time" style="position: absolute; bottom: -25px; right: 50px">
-          <el-text type="info" size="small">{{ '时间:' + item.questionTime }}</el-text>
-        </div>
       </div>
-      <div class="chat-item" style="position: relative">
+      <div class="chat-item">
         <div class="square">ai</div>
         <div class="chat-item-rep ml-10">
           <RepLoading v-if="!item.rep" />
@@ -236,14 +233,13 @@ handleFns.openHandle = () => {
             {{ item.rep }}<span :class="{ 'rep-light-cursor': index === chatList.length - 1 && STATUS === 2 }"></span
           ></span>
         </div>
-        <div class="time" style="position: absolute; bottom: -25px; left: 50px">
-          <el-text type="info" size="small">{{ '时间:' + item.repTime }}</el-text>
-        </div>
       </div>
     </div>
 
     <div class="chat-item-scrollTo" ref="scrollToDom"></div>
   </div>
+
+  <chat-list-panel :chatList="[]"></chat-list-panel>
 
   <div class="submit-bottom">
     <el-button type="danger" round class="doneRep" v-show="pendingCount !== 0" @click="reInit">终止回答</el-button>

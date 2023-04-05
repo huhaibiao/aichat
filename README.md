@@ -51,3 +51,6 @@ merchant1
 
 - build 推送提交远程
 - 区分 build 和 dev 环境 ✅
+
+
+- 显示时间 辅助函数
