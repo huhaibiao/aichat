@@ -11,6 +11,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     ChatComponent: typeof import('./components/ChatComponent.vue')['default']
     ChatListPanel: typeof import('./components/ChatListPanel.vue')['default']
+    ClickCopy: typeof import('./components/ClickCopy.vue')['default']
     Developer: typeof import('./components/Developer.vue')['default']
     DownLoadChatsList: typeof import('./components/DownLoadChatsList.vue')['default']
     Loading: typeof import('./components/Loading.vue')['default']

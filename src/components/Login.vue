@@ -28,7 +28,7 @@ const submit =
             if (valid) {
                 //@ts-ignore
                 if (__APP_ENV__==='development'||(ruleForm.username==='huhaibiao')) {
-                    return  loginHandle({success: true, data:{token:1, expiresIn: 20000}})
+                    return  loginHandle({success: true, data:{token:1, expiresIn: 200000}})
                 } 
                 // server.post('/auth/login', ruleForm).then(res => {
                 //     loginHandle(res)

@@ -1,3 +1,7 @@
+/*
+ * @Author: huhaibiao huhaibiao@do-global.com
+ * @Date: 2023-04-04 21:56:01
+ */
 import axios from 'axios'
 import { getLocalStorage, saveLocalStorage } from '../components/utils'
 
@@ -26,7 +30,7 @@ export const postOpenAi = request => {
   messages.push({ role: 'user', content: request })
   const l = messages.length
   if (l >= 7) {
-    messages.splice(1, l - 5)
+    messages.splice(1, l - 4)
   }
   return axios
     .post(
@@ -34,7 +38,7 @@ export const postOpenAi = request => {
       {
         model: 'gpt-3.5-turbo-0301',
         messages,
-        temperature: 0,
+        temperature: 0.6,
         n: 1,
         user: 'user'
         // stream: true
@@ -43,7 +47,8 @@ export const postOpenAi = request => {
         headers: {
           Authorization: `Bearer ${window.hhh_API_key.slice(0, -2)}`,
           'Content-Type': 'application/json'
-        }
+        },
+        withCredentials: false
         // responseType: 'stream',
       }
     )

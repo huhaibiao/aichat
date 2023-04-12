@@ -306,7 +306,7 @@ handleFns.openHandle = () => {
   overflow-y: auto;
 
   .chat-item {
-    margin-top: 30px;
+    margin-top: 35px;
     width: 100%;
     display: flex;
     font-size: 16px;

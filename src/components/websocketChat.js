@@ -1,10 +1,7 @@
-/***
+/*
  * @Author: huhaibiao huhaibiao@do-global.com
- * @Date: 2023-03-29 15:36:34
- * @Description:
+ * @Date: 2023-04-04 20:21:05
  */
-// const OUT_WS_URL = 'ws://gptapi.jnnxtech.com/task-producer/chatgpt/chat/completions/websocket' //国外
-// let IN_WS_URL = 'ws://gptapi.jnnxtech.com/task-producer/chatgpt/chat/completions/websocket' //国内
 let IN_WS_URL = ''
 __APP_ENV__ && (IN_WS_URL = 'ws://localhost:8088/')
 if (location?.protocol.includes('https')) {

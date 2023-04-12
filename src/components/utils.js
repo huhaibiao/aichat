@@ -103,3 +103,68 @@ export const JLogin = () => {
 
   return false
 }
+
+/**
+ * 移动端触摸滑动功能
+ */
+export const touchSwiper = (element, callback) => {
+  let startX, startY
+
+  element.addEventListener('touchstart', function (event) {
+    startX = event.touches[0].clientX
+    startY = event.touches[0].clientY
+  })
+
+  element.addEventListener('touchmove', function (event) {
+    const deltaX = event.touches[0].clientX - startX
+    const deltaY = event.touches[0].clientY - startY
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // 横向滑动
+      if (deltaX < -80) {
+        // 向左滑动
+        console.log('向左滑动')
+        callback()
+      } else {
+        // 向右滑动
+        console.log('向右滑动')
+      }
+    } else {
+      // 纵向滑动
+      if (deltaY < 0) {
+        // 向上滑动
+        console.log('向上滑动')
+      } else {
+        // 向下滑动
+        console.log('向下滑动')
+      }
+    }
+  })
+
+  element.addEventListener('touchend', function (event) {
+    startX = null
+    startY = null
+  })
+}
+
+/**设备，移动还是pc */
+export function isMobile() {
+  const userAgent = navigator.userAgent.toLowerCase()
+  const mobileKeywords = ['android', 'iphone', 'ipod', 'ipad', 'windows phone', 'blackberry', 'mobile']
+  for (let i = 0; i < mobileKeywords.length; i++) {
+    if (userAgent.indexOf(mobileKeywords[i]) !== -1) {
+      return true
+    }
+  }
+  return false
+}
+
+/**选择中右键 右键菜单*/
+export const mouseRightClick = (dom, callback) => {
+  dom.addEventListener('contextmenu', function (event) {
+    console.log(window.getSelection().toString())
+    event.preventDefault() // 阻止默认右键菜单
+    callback()
+  })
+}
+

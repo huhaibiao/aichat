@@ -3,25 +3,27 @@
  * @Date: 2023-04-04 20:21:05
  * @Description: 
 -->
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts" name="App">
+import { ref, onMounted } from 'vue'
 import ChatComponent from './components/ChatComponent.vue'
 import Login from './components/Login.vue'
 import Developer from './components/Developer.vue'
-import { JLogin } from './components/utils'
+import { JLogin, touchSwiper } from './components/utils'
 import DownLoadChatsList from './components/DownLoadChatsList.vue'
-import { defineAsyncComponent } from 'vue'
+import QuestList from './components/QuestList.vue'
+//@ts-ignore
 import HelpFilled from '~icons/ep/HelpFilled'
-const QuestList = defineAsyncComponent(() => import('./components/QuestList.vue'))
-// const Login = defineAsyncComponent(() => import('./components/Login.vue'))
-// const Developer = defineAsyncComponent(() => import('./components/Developer.vue'))
+
 
 let login = ref(true)
 const isLogin = () => {
   login.value = JLogin()
 }
 isLogin()
-const chat = ref({})
+const chat = ref({
+  question: '',
+  rep: ''
+})
 const dialogVisible = ref(false)
 
 const questListChange = (index, chatItem) => {
@@ -30,16 +32,22 @@ const questListChange = (index, chatItem) => {
 }
 
 const controlShow = ref(false)
-  
+onMounted(() => {
+  touchSwiper(document, () => controlShow.value = true)
+})
+
 </script>
 
 <template>
   <div class="exp-chat-list" v-if="!login">
-  <el-icon :size="30" style="margin: 10px " @click="controlShow=!controlShow">
-       <HelpFilled  />
-  </el-icon>
-    <DownLoadChatsList v-if="controlShow"></DownLoadChatsList>
-    <QuestList style="margin-top: 10px" @change="questListChange" v-if="controlShow"></QuestList>
+    <el-icon :size="30" style="margin-top: 10px; cursor: pointer" color="#409EFC" @click="controlShow = !controlShow">
+      <HelpFilled />
+    </el-icon>
+
+    <el-drawer v-model="controlShow" title="I am the title" :with-header="false" size="220">
+      <DownLoadChatsList></DownLoadChatsList>
+      <QuestList style="margin-top: 10px" @change="questListChange"></QuestList>
+    </el-drawer>
   </div>
 
   <el-dialog v-model="dialogVisible" :title="chat.question" width="80%">
@@ -70,7 +78,7 @@ const controlShow = ref(false)
   position: fixed;
   display: flex;
   flex-direction: column;
-  z-index: 12;
+  z-index: 120;
   top: 5px;
   right: 20px;
   // width: 20px;

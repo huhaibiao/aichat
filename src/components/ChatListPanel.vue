@@ -12,7 +12,9 @@ const chatsList = reactive<any[]>([])
 const scrollToDom = ref(null)
 const qInoutEl = ref(null) as unknown
 
-onBeforeMount(() => {})
+onBeforeMount(() => {
+  
+})
 
 onMounted(() => {
   ;(scrollToDom.value as any).scrollIntoView({ behavior: 'auto', block: 'end', inline: 'nearest' })
