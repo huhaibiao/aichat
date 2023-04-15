@@ -2,3 +2,5 @@ dist
 
 *DS*
 node_modules
+
+.env.local

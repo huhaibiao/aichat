@@ -13,6 +13,7 @@ import DownLoadChatsList from './components/DownLoadChatsList.vue'
 import QuestList from './components/QuestList.vue'
 //@ts-ignore
 import HelpFilled from '~icons/ep/HelpFilled'
+import WsChat from './components/WsChat.vue'
 
 
 let login = ref(true)
@@ -57,7 +58,8 @@ onMounted(() => {
   <Developer />
 
   <div style="width: 100%; height: 100%" class="chat-component" v-if="!login">
-    <ChatComponent @j-login="isLogin"></ChatComponent>
+    <!-- <ChatComponent @j-login="isLogin"></ChatComponent> -->
+    <WsChat @j-login="isLogin"></WsChat>
   </div>
   <div class="login" v-if="login">
     <Login @login-success="login = false"></Login>

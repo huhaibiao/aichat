@@ -9,6 +9,7 @@ declare global {
   interface Window {
     axios: Axios
     __APP_ENV__: any
-    hhh_API_key: String
+    hhh_API_key: String,
+    getSelection: ()=>{}
   }
 }

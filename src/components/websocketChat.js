@@ -2,8 +2,8 @@
  * @Author: huhaibiao huhaibiao@do-global.com
  * @Date: 2023-04-04 20:21:05
  */
-let IN_WS_URL = ''
-__APP_ENV__ && (IN_WS_URL = 'ws://localhost:8088/')
+let IN_WS_URL = 'ws://18.216.251.165:8088'
+// __APP_ENV__ && (IN_WS_URL = 'ws://localhost:8088/')
 if (location?.protocol.includes('https')) {
     IN_WS_URL = 'wss' + IN_WS_URL.slice(2)
 }

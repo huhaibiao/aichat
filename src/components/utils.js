@@ -162,8 +162,9 @@ export function isMobile() {
 /**选择中右键 右键菜单*/
 export const mouseRightClick = (dom, callback) => {
   dom.addEventListener('contextmenu', function (event) {
+    console.log("🚀 ~ file: utils.js:165 ~ event:", event.target)
     console.log(window.getSelection().toString())
-    event.preventDefault() // 阻止默认右键菜单
+    // event.preventDefault() // 阻止默认右键菜单
     callback()
   })
 }

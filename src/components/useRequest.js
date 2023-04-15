@@ -1,7 +1,6 @@
-/*** 
+/*
  * @Author: huhaibiao huhaibiao@do-global.com
  * @Date: 2023-04-02 22:34:03
- * @Description: 
  */
 import { ref } from "vue"
 
@@ -9,9 +8,8 @@ const promises = []
 const pendingCount = ref(0)
 const useActionRequest = (fnPromise) => {
     pendingCount.value++
-    return fnPromise.then(res => {
+    return fnPromise.finally(res => {
         pendingCount.value--
-        return res
     })
 }
 

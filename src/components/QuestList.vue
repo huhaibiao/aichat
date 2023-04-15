@@ -17,7 +17,7 @@ const isMobile1 = isMobile()
 const isMobileV = ref(isMobile1)
 </script>
 <template>
-  <el-select v-model="value" placeholder="打开问题列表" @change="onChange">
+  <el-select v-model="value" placeholder="打开问题列表" filterable @change="onChange" style="height: 800px">
     <el-option class="option" v-for="(item, index) in chatList" :key="index" :label="item.question" :value="index">
       <el-tooltip class="box-item" effect="dark" :content="item.question" :hide-after="0" placement="top"
         v-if="!isMobileV">
@@ -34,5 +34,11 @@ const isMobileV = ref(isMobile1)
 .option {
   width: 200px;
   padding: 0 0 0 8px;
+}
+</style>
+
+<style>
+.el-select-dropdown__wrap {
+  max-height: 500px;
 }
 </style>

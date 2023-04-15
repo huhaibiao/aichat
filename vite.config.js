@@ -14,7 +14,8 @@ import IconsResolver from 'unplugin-icons/resolver'
 import { confirmCommit, getBranch, updatePkg } from './hooks/index'
 import path from 'path'
 import dotenv from 'dotenv'
-dotenv.config()
+dotenv.config({ path: '.env.local' })
+
 const pathSrc = path.resolve(__dirname, 'src')
 //打包一次版本加一
 const preBuild = async () => {
@@ -87,7 +88,7 @@ export default defineConfig(async ({ command, mode }) => {
     },
     define: {
       __APP_ENV__: JSON.stringify(mode),
-      hhh_API_key: JSON.stringify(process.env.OPENAI_API_KEY)
+      hhh_API_key: JSON.stringify(process.env.VUE_APP_apiKey)
     }
   }
 })

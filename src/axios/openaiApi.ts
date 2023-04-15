@@ -45,8 +45,8 @@ export const postOpenAi = request => {
       },
       {
         headers: {
-          Authorization: `Bearer ${window.hhh_API_key.slice(0, -2)}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${window.hhh_API_key.slice(0, -2).slice(2)}`,
+          'Content-Type': 'application/json',
         },
         withCredentials: false
         // responseType: 'stream',
@@ -67,6 +67,6 @@ export const postOpenAi = request => {
       console.log('🚀 ~ file: index.js:75 ~ postOpenAi ~ er:', er)
       console.log('post api请求出错')
       // Promise.reject(errData)
-      throw new Error(errData)
+      throw new Error(er)
     })
 }

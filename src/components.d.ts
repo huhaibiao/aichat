@@ -17,5 +17,6 @@ declare module '@vue/runtime-core' {
     Loading: typeof import('./components/Loading.vue')['default']
     Login: typeof import('./components/Login.vue')['default']
     QuestList: typeof import('./components/QuestList.vue')['default']
+    WsChat: typeof import('./components/WsChat.vue')['default']
   }
 }

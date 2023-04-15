@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import RepLoading from './Loading.vue'
 import { ws, sendReq, handleFns, initWs, params } from './websocketChat'
-import { bytesJudge, formatCommentTime, getLocalStorage, saveLocalStorage } from './utils'
+import { bytesJudge, formatCommentTime, getLocalStorage, mouseRightClick, saveLocalStorage } from './utils'
 import { onBeforeUnmount, onBeforeMount, onUnmounted, Ref, ref, onMounted, reactive } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { ElMessage } from 'element-plus'
@@ -9,6 +9,7 @@ import { pendingCount, useActionRequest } from './useRequest'
 import { postOpenAi, chatTmpList } from './../axios/openaiApi'
 const emit = defineEmits(['JLogin'])
 emit('JLogin')
+let selectedSpan = -1
 
 /**设置用户唯一sessionId */
 const sessionId = localStorage.getItem('sessionId')
@@ -22,7 +23,6 @@ if (sessionId) {
 const textarea = ref('')
 /** 对话状态： 包括 0空闲中，1发送中和等待回复中，2回复中，0回复结束 */
 let STATUS = ref(0)
-let chatList = ref<string[]>([])
 const chatsList = reactive<any[]>([])
 
 const scrollToDom = ref(null)
@@ -30,31 +30,37 @@ const qInoutEl = ref(null) as unknown
 
 let flat = true
 
-const submit = () => {
+const submit = (value?) => {
   // if (STATUS.value !== 0) return
   let aiReply = '',
     req = textarea.value
+  if (value) {
+    req = value
+  }
   const chatItem = reactive({
     question: '',
     questionTime: '',
     rep: '',
     repTime: ''
   })
-  chatItem.question = textarea.value
+  chatItem.question = req
   chatItem.questionTime = new Date().toLocaleString()
   textarea.value = ''
   if (!req.trim()) {
     return
   }
   STATUS.value = 1
-  chatList.value = [...chatList.value, req, aiReply]
-  chatsList.push(chatItem)
+  if (centerDialogVisible.value) {
+    chatsList.splice(selectedSpan + 1, 0, chatItem)
+    selectedSpan = -1
+  } else {
+    chatsList.push(chatItem)
+  }
   flat = true
   // sendReq(req)
   const postOpenAiPromise = postOpenAi(chatItem.question)
   useActionRequest(postOpenAiPromise).then(res => {
     console.log('🚀 ~ file: ChatComponent.vue:42 ~ postOpenAi ~ res:', res)
-    chatList.value[chatList.value.length - 1] = res
     chatItem.rep = res
     chatItem.repTime = new Date().toLocaleString()
     chatTmpList.push(chatItem)
@@ -65,10 +71,9 @@ const submit = () => {
       type: 'success'
     })
     saveLocalStorage(chatsList, 'chatsList')
-  })
-
-  setTimeout(() => {
-    document.querySelector('.chat-item-scrollTo')!.scrollIntoView({ behavior: 'auto', block: 'end', inline: 'nearest' })
+  }).catch(err => {
+    chatItem.rep = err.response?.data?.error?.message
+    chatItem.repTime = new Date().toLocaleString()
   })
 }
 
@@ -83,7 +88,7 @@ onBeforeUnmount(() => {
 })
 
 onMounted(() => {
-  ;(scrollToDom.value as any).scrollIntoView({ behavior: 'auto', block: 'end', inline: 'nearest' })
+  ; (scrollToDom.value as any).scrollIntoView({ behavior: 'auto', block: 'end', inline: 'nearest' })
 
   var allowedElements = document.querySelectorAll('.submit-bottom')
   let oldScrollTop = 0
@@ -117,15 +122,6 @@ onMounted(() => {
       }
     }
   })
-  // document.querySelector('.submit-bottom')!.addEventListener(
-  //   'touchmove',
-  //   // 'scroll',
-  //   function (event) {
-  //     console.log('🚀 ~ file: ChatComponent.vue:70 ~ onMounted ~ event:', event)
-  //     event.preventDefault()
-  //   },
-  //   false
-  // )
   let isComposition = false
   const qInoutEl = document.querySelector('.chat-input') as any
   qInoutEl.addEventListener('compositionstart', () => {
@@ -142,8 +138,28 @@ onMounted(() => {
       submit()
     }
   })
-})
 
+  document.querySelector('.chat-list')?.addEventListener('mousedown', (event) => {
+    //@ts-ignore
+    selectedSpan = + event.target?.getAttribute("class")
+  })
+
+  mouseRightClick(document.querySelector('.chat-list'), showDialog)
+
+  document.querySelector('.chat-list')?.addEventListener('contextmenu', function (event) {
+    //@ts-ignore
+    selectedSpan = + event.target?.getAttribute("class")
+    // event.preventDefault() // 阻止默认右键菜单
+    showDialog()
+  })
+})
+const centerDialogVisible = ref(false)
+
+watch(centerDialogVisible, (val) => {
+  if (val === false) {
+    selectedSpan = -1
+  }
+})
 /** 断开重联 */
 const reInit = () => {
   // ws.close()
@@ -151,71 +167,18 @@ const reInit = () => {
   STATUS.value = 0
 }
 
-/**转译html */
-const Translation = (params = '') => {
-  let res
-  res = params.replace(/\t/g, '&nbsp;&nbsp;').replace(/ /g, '&nbsp;&nbsp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  if (res?.indexOf('\n') !== -1) {
-    res = res.replace(/\n/g, '<br>')
+const showDialog = () => {
+  dialogInput.value = window.getSelection()!.toString()
+  if (dialogInput.value) {
+    centerDialogVisible.value = true
   }
 }
-
-/** 处理正常的回复流字符串 */
-const aiRepHandle = (str = '') => {
-  STATUS.value = 2
-  chatList.value[chatList.value.length - 1] += str
-  if (flat) {
-    setTimeout(() => {
-      ;(scrollToDom.value as any).scrollIntoView({
-        behavior: 'auto',
-        block: 'end',
-        inline: 'nearest'
-      })
-    })
-  }
+const dialogInput = ref('')
+const dialogSubmit = () => {
+  submit(dialogInput.value)
+  centerDialogVisible.value = false
 }
 
-handleFns.mesHandle = event => {
-  let res = event.data
-  try {
-    let data = JSON.parse(res)
-    if (data.msg === 'DONE') {
-      STATUS.value = 0
-      saveLocalStorage(chatList.value)
-    }
-    if (!data.time) {
-      //不是对象，是回复流
-      aiRepHandle(data)
-    }
-  } catch (error) {
-    //不是对象，是回复流
-    aiRepHandle(res)
-  }
-}
-
-handleFns.closeHandle = event => {
-  console.log(
-    'WebSocket closed with code ' +
-      event.code +
-      ' and reason ' +
-      event.reason +
-      'time:' +
-      new Date().toLocaleTimeString()
-  )
-  STATUS.value = 0
-  // initWs()
-}
-
-handleFns.errorHandle = () => {
-  STATUS.value = 0
-  // initWs()
-}
-
-handleFns.openHandle = () => {
-  //  STATUS.value = 0
-}
-
-// initWs()
 </script>
 
 <template>
@@ -232,9 +195,9 @@ handleFns.openHandle = () => {
         <div class="square">ai</div>
         <div class="chat-item-rep ml-10">
           <RepLoading v-if="!item.rep" />
-          <span>
-            {{ item.rep }}<span :class="{ 'rep-light-cursor': index === chatList.length - 1 && STATUS === 2 }"></span
-          ></span>
+          <span :class="index + ''" :key="index">
+            {{ item.rep }}<span
+              :class="{ 'rep-light-cursor': index === chatsList.length - 1 && STATUS === 2 }"></span></span>
         </div>
         <div class="time" style="position: absolute; bottom: -25px; left: 50px">
           <el-text type="info" size="small">{{ '时间:' + item.repTime }}</el-text>
@@ -246,21 +209,28 @@ handleFns.openHandle = () => {
   </div>
 
   <div class="submit-bottom">
-    <el-button type="danger" round class="doneRep" v-show="pendingCount !== 0" @click="reInit">终止回答</el-button>
-    <el-input
-      ref="qInoutEl"
-      class="do-scrollbar-b chat-input"
-      v-model="textarea"
-      :autosize="{ minRows: 2, maxRows: 4 }"
-      type="textarea"
-      placeholder="欢迎提问～"
-    />
+    <el-button type="danger" round class="doneRep" v-show="pendingCount !== 0" @click="reInit">正在请求中数：{{ pendingCount
+    }},终止所有请求</el-button>
+    <el-input ref="qInoutEl" class="do-scrollbar-b chat-input" v-model="textarea" :autosize="{ minRows: 2, maxRows: 4 }"
+      type="textarea" placeholder="欢迎提问～" />
     <el-button type="primary" class="ml-10 submit-btn" @click="submit">
-      <!-- {{ STATUS !== 0 ? '回复中' : '提交' }} -->
       {{ '提交' }}
-      <!-- <el-icon class="is-loading" v-if="STATUS !== 0"> <Loading /> </el-icon> -->
     </el-button>
   </div>
+
+  <el-dialog v-model="centerDialogVisible" width="70%" center>
+    <div style="word-wrap:break-word;">
+      {{ dialogInput }}
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="centerDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="dialogSubmit">
+          提交
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <style lang="less" scoped>
@@ -314,6 +284,7 @@ handleFns.openHandle = () => {
     font-size: 16px;
     font-family: Avenir, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans,
       sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', Segoe UI Symbol, 'Noto Color Emoji';
+
     .chat-item-rep {
       max-width: 100%;
       // width: 100%;
