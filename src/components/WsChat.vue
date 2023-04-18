@@ -1,11 +1,22 @@
 <script lang="ts" setup name="WsChat">
 import RepLoading from './Loading.vue'
 import { ws, sendReq, handleFns, initWs, params } from './websocketChat'
-import { bytesJudge } from './utils'
+import { bytesJudge, mouseRightClick } from './utils'
 import { onBeforeUnmount, onBeforeMount, onUnmounted, Ref, ref, onMounted } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
+// import { marked } from 'marked';
+// import highlight from 'highlight.js';
+
+import 'highlight.js/styles/github.css';
 const emit = defineEmits(['JLogin'])
 emit('JLogin')
+let selectedSpan = -1
+/** 获取本地存储数据 */
+const getLocalStorage = (cKey?: any) => {
+    const key = cKey ? cKey : 'chat-list'
+    return JSON.parse(localStorage.getItem(key)!)
+}
+
 
 /**设置用户唯一sessionId */
 const sessionId = localStorage.getItem('sessionId')
@@ -19,37 +30,50 @@ if (sessionId) {
 const textarea = ref('')
 /** 对话状态： 包括 0空闲中，1发送中和等待回复中，2回复中，0回复结束 */
 let STATUS = ref(0)
-let chatList = ref<string[]>([])
+let chatsList = reactive<any[]>([])
+chatsList.push(...getLocalStorage('chatsList'))
+selectedSpan = chatsList.length - 1
 const scrollToDom = ref(null)
 const qInoutEl = ref(null) as any
 
 let flat = true
 
-const submit = () => {
-    if (STATUS.value !== 0) return
-    let aiReply = '',
-        req = textarea.value
+const submit = (value?) => {
+    // if (STATUS.value !== 0) return
+    let req = textarea.value
+    if (value) {
+        req = value
+    } else {
+        selectedSpan = chatsList.length
+    }
+    const chatItem = reactive({
+        question: '',
+        questionTime: '',
+        rep: '',
+        repTime: ''
+    })
+    textarea.value = ''
+    chatItem.question = req
+    chatItem.questionTime = new Date().toLocaleString()
     textarea.value = ''
     if (!req.trim()) {
         return
     }
     STATUS.value = 1
-    chatList.value = [...chatList.value, req, aiReply]
+    chatsList.splice(selectedSpan, 0, chatItem)
+
     flat = true
-    sendReq(req)
-    setTimeout(() => {
+    const sendData = JSON.stringify({ req, index: selectedSpan })
+    sendReq(sendData)
+    if (selectedSpan === chatsList.length) {
+        // setTimeout(() => {
         document.querySelector('.chat-item-scrollTo')!.scrollIntoView({ behavior: 'auto', block: 'end', inline: 'nearest' })
-    })
+        // })
+    }
 }
 
 onBeforeMount(() => {
-    const localS = getLocalStorage()
-    if (!localS) {
-        ; (chatList as any) = null
-        chatList = ref<string[]>([])
-    } else {
-        chatList.value = localS
-    }
+
 })
 
 onBeforeUnmount(() => {
@@ -116,6 +140,20 @@ onMounted(() => {
             submit()
         }
     })
+
+    document.querySelector('.chat-list')?.addEventListener('mousedown', (event) => {
+        //@ts-ignore
+        selectedSpan = + event.target?.getAttribute("class")
+    })
+
+    mouseRightClick(document.querySelector('.chat-list'), showDialog)
+
+    document.querySelector('.chat-list')?.addEventListener('contextmenu', function (event) {
+        //@ts-ignore
+        selectedSpan = + event.target?.getAttribute("class")
+        event.preventDefault() // 阻止默认右键菜单
+        showDialog()
+    })
 })
 
 /** 断开重联 */
@@ -142,7 +180,7 @@ const deletedChatData = (params: string[] = []) => {
 /**本地存储对话数据 */
 const saveLocalStorage = (params: string[] = []) => {
     deletedChatData(params)
-    const key = 'chat-list'
+    const key = 'chatsList'
     try {
         localStorage.setItem(key, JSON.stringify(params))
     } catch (error) {
@@ -150,11 +188,6 @@ const saveLocalStorage = (params: string[] = []) => {
     }
 }
 
-/** 获取本地存储数据 */
-const getLocalStorage = () => {
-    const key = 'chat-list'
-    return JSON.parse(localStorage.getItem(key)!)
-}
 
 /**转译html */
 const Translation = (params = '') => {
@@ -166,9 +199,9 @@ const Translation = (params = '') => {
 }
 
 /** 处理正常的回复流字符串 */
-const aiRepHandle = (str = '') => {
+const aiRepHandle = (res = { content: '', id: 0 }) => {
     STATUS.value = 2
-    chatList.value[chatList.value.length - 1] += str
+    chatsList[res.id].rep += res.content
     if (flat) {
         setTimeout(() => {
             ; (scrollToDom.value as any).scrollIntoView({
@@ -180,22 +213,31 @@ const aiRepHandle = (str = '') => {
     }
 }
 
+// marked.setOptions({
+//     highlight: function (code) {
+//         return highlight.highlightAuto(code).value;
+//     },
+//     langPrefix: 'hljs language-',
+// });
+
 handleFns.mesHandle = event => {
     let res = event.data
-    try {
-        let data = JSON.parse(res)
-        if (data.msg === 'DONE') {
-            STATUS.value = 0
-            saveLocalStorage(chatList.value)
-        }
-        if (!data.time) {
-            //不是对象，是回复流
-            aiRepHandle(data)
-        }
-    } catch (error) {
-        //不是对象，是回复流
-        aiRepHandle(res)
+    // try {
+    let data = JSON.parse(res)
+    if (data.msg === 'DONE') {
+        STATUS.value = 0
+        chatsList[selectedSpan].repTime = new Date().toLocaleString()
+        // chatsList.value[chatsList.value.length - 1] = marked.parse(chatsList.value[chatsList.value.length - 1])
+        saveLocalStorage(chatsList) //做防抖
     }
+    if (!data.time) {
+        //不是对象，是回复流
+        aiRepHandle(data)
+    }
+    // } catch (error) {
+    //     //不是对象，是回复流
+    //     aiRepHandle(res)
+    // }
 }
 
 handleFns.closeHandle = event => {
@@ -215,34 +257,53 @@ handleFns.closeHandle = event => {
 handleFns.errorHandle = () => {
     STATUS.value = 0
     // initWs()
-    alert('ws链接发生错误')
+    // alert('ws链接发生错误')
 }
 
 handleFns.openHandle = () => {
     STATUS.value = 0
 }
 
+const centerDialogVisible = ref(false)
+
+const showDialog = () => {
+    dialogInput.value = window.getSelection()!.toString()
+    if (dialogInput.value) {
+        centerDialogVisible.value = true
+    }
+}
+const dialogInput = ref('')
+const dialogSubmit = () => {
+    submit(dialogInput.value)
+    centerDialogVisible.value = false
+}
+
 initWs()
+
 </script>
 
 <template>
     <div class="chat-list">
-        <div class="chat-item" :class="{ 'chat-item-user': index % 2 === 0 }" v-for="(item, index) of chatList"
-            :key="index">
-            <template v-if="index % 2 === 0">
-                <div class="chat-item-rep mr-10 user">{{ item }}</div>
+        <div v-for="(item, index) of chatsList" :key="index">
+            <div class="chat-item chat-item-user" style="position: relative">
+                <div class="chat-item-rep mr-10 user">{{ item.question }}</div>
                 <div class="me square">我</div>
-            </template>
-
-            <template v-else>
+                <div class="time" style="position: absolute; bottom: -25px; right: 50px">
+                    <el-text type="info" size="small">{{ '时间:' + item.questionTime }}</el-text>
+                </div>
+            </div>
+            <div class="chat-item" style="position: relative">
                 <div class="square">ai</div>
                 <div class="chat-item-rep ml-10">
-                    <RepLoading v-if="index === chatList.length - 1 && STATUS === 1" />
-                    <span>
-                        {{ item }}<span
-                            :class="{ 'rep-light-cursor': index === chatList.length - 1 && STATUS === 2 }"></span></span>
+                    <RepLoading v-if="!item.rep" />
+                    <span :class="index + 1 + ''">
+                        {{ item.rep }}<span
+                            :class="{ 'rep-light-cursor': index === chatsList.length - 1 && STATUS === 2 }"></span></span>
                 </div>
-            </template>
+                <div class="time" style="position: absolute; bottom: -25px; left: 50px">
+                    <el-text type="info" size="small">{{ '时间:' + item.repTime }}</el-text>
+                </div>
+            </div>
         </div>
 
         <div class="chat-item-scrollTo" ref="scrollToDom"></div>
@@ -257,9 +318,25 @@ initWs()
                 <Loading />
             </el-icon></el-button>
     </div>
+
+    <el-dialog v-model="centerDialogVisible" width="70%" center>
+        <div style="word-wrap:break-word;">
+            {{ dialogInput }}
+        </div>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="centerDialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="dialogSubmit">
+                    提交
+                </el-button>
+            </span>
+        </template>
+    </el-dialog>
 </template>
 
 <style lang="less" scoped>
+@import "highlight.js/styles/dark.css";
+
 .doneRep {
     position: absolute;
     bottom: 100px;

@@ -1,3 +1,7 @@
+/*
+ * @Author: huhaibiao huhaibiao@do-global.com
+ * @Date: 2023-03-28 15:00:05
+ */
 /***
  * @Author: huhaibiao huhaibiao@do-global.com
  * @Date: 2023-03-28 15:00:05
@@ -6,6 +10,7 @@
 import { createApp } from 'vue'
 import './style.less'
 import App from './App.vue'
+import 'highlight.js/styles/idea.css'
 // import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 const app = createApp(App)

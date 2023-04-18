@@ -5,7 +5,7 @@
 -->
 <script setup lang="ts" name="App">
 import { ref, onMounted } from 'vue'
-import ChatComponent from './components/ChatComponent.vue'
+// import ChatComponent from './components/ChatComponent.vue'
 import Login from './components/Login.vue'
 import Developer from './components/Developer.vue'
 import { JLogin, touchSwiper } from './components/utils'
