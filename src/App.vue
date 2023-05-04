@@ -15,7 +15,6 @@ import QuestList from './components/QuestList.vue'
 import HelpFilled from '~icons/ep/HelpFilled'
 import WsChat from './components/WsChat.vue'
 
-
 let login = ref(true)
 const isLogin = () => {
   login.value = JLogin()
@@ -34,9 +33,8 @@ const questListChange = (index, chatItem) => {
 
 const controlShow = ref(false)
 onMounted(() => {
-  touchSwiper(document, () => controlShow.value = true)
+  touchSwiper(document, () => (controlShow.value = true))
 })
-
 </script>
 
 <template>
@@ -55,7 +53,7 @@ onMounted(() => {
     <div style="white-space: pre-wrap">{{ chat.rep }}</div>
   </el-dialog>
 
-  <Developer />
+  <!-- <Developer /> -->
 
   <div style="width: 100%; height: 100%" class="chat-component" v-if="!login">
     <!-- <ChatComponent @j-login="isLogin"></ChatComponent> -->

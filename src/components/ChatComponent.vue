@@ -30,7 +30,7 @@ const qInoutEl = ref(null) as unknown
 
 let flat = true
 
-const submit = (value?) => {
+const submit = (event?, value?) => {
   // if (STATUS.value !== 0) return
   let aiReply = '',
     req = textarea.value
@@ -175,7 +175,7 @@ const showDialog = () => {
 }
 const dialogInput = ref('')
 const dialogSubmit = () => {
-  submit(dialogInput.value)
+  submit(null, dialogInput.value)
   centerDialogVisible.value = false
 }
 
@@ -213,7 +213,7 @@ const dialogSubmit = () => {
     }},终止所有请求</el-button>
     <el-input ref="qInoutEl" class="do-scrollbar-b chat-input" v-model="textarea" :autosize="{ minRows: 2, maxRows: 4 }"
       type="textarea" placeholder="欢迎提问～" />
-    <el-button type="primary" class="ml-10 submit-btn" @click="submit">
+    <el-button type="primary" class="ml-10 submit-btn" @click="submit(null)">
       {{ '提交' }}
     </el-button>
   </div>

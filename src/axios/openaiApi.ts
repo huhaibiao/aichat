@@ -46,7 +46,7 @@ export const postOpenAi = request => {
       {
         headers: {
           Authorization: `Bearer ${window.hhh_API_key.slice(0, -2).slice(2)}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         withCredentials: false
         // responseType: 'stream',

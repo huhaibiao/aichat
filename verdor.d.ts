@@ -1,15 +1,19 @@
 /*
  * @Author: huhaibiao huhaibiao@do-global.com
  * @Date: 2023-03-29 16:04:22
- * @Description: 
+ * @Description:
  */
+
 import { Axios } from 'axios'
 
 declare global {
   interface Window {
     axios: Axios
     __APP_ENV__: any
-    hhh_API_key: String,
-    getSelection: ()=>{}
+    hhh_API_key: String
+    getSelection: () => {}
+    __APP_ENV__: string
   }
 }
+
+declare const __APP_ENV__: string
