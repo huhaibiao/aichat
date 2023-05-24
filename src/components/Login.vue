@@ -3,7 +3,7 @@ import { reactive, ref } from 'vue'
 import type { FormRules, FormInstance } from 'element-plus'
 import { server } from './../axios'
 import { ElMessage } from 'element-plus'
-import { saveLocalLoginSuccess } from './utils'
+import { saveLocalLoginSuccess } from '../utils'
 const ruleForm = reactive({
   username: '',
   password: ''
@@ -32,6 +32,17 @@ const submit = async (formEl: FormInstance | undefined) => {
     }
   })
 }
+
+const enterSubmit = (event: KeyboardEvent) => {
+  if (event.keyCode === 13) {
+    // Enter键被按下
+    submit(ruleFormRef.value)
+  }
+}
+document.addEventListener('keydown', enterSubmit)
+onUnmounted(() => {
+  document.removeEventListener('keydown', enterSubmit)
+})
 
 const loginHandle = res => {
   let mes = '登录成功',

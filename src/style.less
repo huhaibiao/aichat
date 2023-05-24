@@ -23,10 +23,13 @@
   box-sizing: border-box;
 }
 @bg-lightest: #f2f3f5;
+@bg-shade:linear-gradient(to top, #f3e7e9 0%, #e3eeff 99%, #e3eeff 100%);
+@bg-shade2:linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%);
 
+/** dark*/
+@dark-bg-color: #212121;
 body {
-  background-color: @bg-lightest;
-
+  // background-image: @bg-shade
 }
 
 
@@ -35,6 +38,7 @@ body {
   height: 100vh;
   margin: 0 auto;
   position: relative;
+  background-color: @bg-lightest;
   // padding: 2rem;
 }
 

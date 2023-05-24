@@ -3,7 +3,7 @@
  * @Date: 2023-04-04 21:56:01
  */
 import axios from 'axios'
-import { getLocalStorage, saveLocalStorage } from '../components/utils'
+import { getLocalStorage, saveLocalStorage } from '../utils'
 
 const historyList = getLocalStorage()
 const x = historyList.findIndex(item => {

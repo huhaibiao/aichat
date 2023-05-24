@@ -46,12 +46,6 @@ export default defineConfig(async ({ command, mode }) => {
       vue(),
       splitVendorChunkPlugin(),
       AutoImport({
-        resolvers: [ElementPlusResolver()]
-      }),
-      Components({
-        resolvers: [ElementPlusResolver()]
-      }),
-      AutoImport({
         imports: ['vue'],
         resolvers: [
           ElementPlusResolver(),
@@ -72,7 +66,7 @@ export default defineConfig(async ({ command, mode }) => {
       }),
       Icons({
         autoInstall: true
-      }),
+      })
     ],
     base,
     server: {

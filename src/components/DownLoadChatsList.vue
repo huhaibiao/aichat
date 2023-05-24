@@ -4,7 +4,7 @@
  * @Description: 
 -->
 <script setup lang="ts" name="DownLoadChatsList">
-import { getLocalStorage } from './utils'
+import { getLocalStorage } from '../utils'
 
 function downloadFile(fileName, content) {
   const aLink = document.createElement('a')

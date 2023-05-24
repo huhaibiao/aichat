@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import RepLoading from './Loading.vue'
 import { ws, sendReq, handleFns, initWs, params } from './websocketChat'
-import { bytesJudge, formatCommentTime, getLocalStorage, mouseRightClick, saveLocalStorage } from './utils'
+import { bytesJudge, formatCommentTime, getLocalStorage, mouseRightClick, saveLocalStorage } from '../utils'
 import { onBeforeUnmount, onBeforeMount, onUnmounted, Ref, ref, onMounted, reactive } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { ElMessage } from 'element-plus'
@@ -59,22 +59,24 @@ const submit = (event?, value?) => {
   flat = true
   // sendReq(req)
   const postOpenAiPromise = postOpenAi(chatItem.question)
-  useActionRequest(postOpenAiPromise).then(res => {
-    console.log('🚀 ~ file: ChatComponent.vue:42 ~ postOpenAi ~ res:', res)
-    chatItem.rep = res
-    chatItem.repTime = new Date().toLocaleString()
-    chatTmpList.push(chatItem)
-    console.log('🚀 ~ file: ChatComponent.vue:59 ~ useActionRequest ~ chatItem:', JSON.stringify(chatItem))
-    STATUS.value = 0
-    ElMessage({
-      message: '',
-      type: 'success'
+  useActionRequest(postOpenAiPromise)
+    .then(res => {
+      console.log('🚀 ~ file: ChatComponent.vue:42 ~ postOpenAi ~ res:', res)
+      chatItem.rep = res
+      chatItem.repTime = new Date().toLocaleString()
+      chatTmpList.push(chatItem)
+      console.log('🚀 ~ file: ChatComponent.vue:59 ~ useActionRequest ~ chatItem:', JSON.stringify(chatItem))
+      STATUS.value = 0
+      ElMessage({
+        message: '',
+        type: 'success'
+      })
+      saveLocalStorage(chatsList, 'chatsList')
     })
-    saveLocalStorage(chatsList, 'chatsList')
-  }).catch(err => {
-    chatItem.rep = err.response?.data?.error?.message
-    chatItem.repTime = new Date().toLocaleString()
-  })
+    .catch(err => {
+      chatItem.rep = err.response?.data?.error?.message
+      chatItem.repTime = new Date().toLocaleString()
+    })
 }
 
 onBeforeMount(() => {
@@ -88,7 +90,7 @@ onBeforeUnmount(() => {
 })
 
 onMounted(() => {
-  ; (scrollToDom.value as any).scrollIntoView({ behavior: 'auto', block: 'end', inline: 'nearest' })
+  ;(scrollToDom.value as any).scrollIntoView({ behavior: 'auto', block: 'end', inline: 'nearest' })
 
   var allowedElements = document.querySelectorAll('.submit-bottom')
   let oldScrollTop = 0
@@ -139,23 +141,23 @@ onMounted(() => {
     }
   })
 
-  document.querySelector('.chat-list')?.addEventListener('mousedown', (event) => {
+  document.querySelector('.chat-list')?.addEventListener('mousedown', event => {
     //@ts-ignore
-    selectedSpan = + event.target?.getAttribute("class")
+    selectedSpan = +event.target?.getAttribute('class')
   })
 
   mouseRightClick(document.querySelector('.chat-list'), showDialog)
 
   document.querySelector('.chat-list')?.addEventListener('contextmenu', function (event) {
     //@ts-ignore
-    selectedSpan = + event.target?.getAttribute("class")
+    selectedSpan = +event.target?.getAttribute('class')
     // event.preventDefault() // 阻止默认右键菜单
     showDialog()
   })
 })
 const centerDialogVisible = ref(false)
 
-watch(centerDialogVisible, (val) => {
+watch(centerDialogVisible, val => {
   if (val === false) {
     selectedSpan = -1
   }
@@ -178,7 +180,6 @@ const dialogSubmit = () => {
   submit(null, dialogInput.value)
   centerDialogVisible.value = false
 }
-
 </script>
 
 <template>
@@ -196,8 +197,8 @@ const dialogSubmit = () => {
         <div class="chat-item-rep ml-10">
           <RepLoading v-if="!item.rep" />
           <span :class="index + ''" :key="index">
-            {{ item.rep }}<span
-              :class="{ 'rep-light-cursor': index === chatsList.length - 1 && STATUS === 2 }"></span></span>
+            {{ item.rep }}<span :class="{ 'rep-light-cursor': index === chatsList.length - 1 && STATUS === 2 }"></span
+          ></span>
         </div>
         <div class="time" style="position: absolute; bottom: -25px; left: 50px">
           <el-text type="info" size="small">{{ '时间:' + item.repTime }}</el-text>
@@ -209,25 +210,30 @@ const dialogSubmit = () => {
   </div>
 
   <div class="submit-bottom">
-    <el-button type="danger" round class="doneRep" v-show="pendingCount !== 0" @click="reInit">正在请求中数：{{ pendingCount
-    }},终止所有请求</el-button>
-    <el-input ref="qInoutEl" class="do-scrollbar-b chat-input" v-model="textarea" :autosize="{ minRows: 2, maxRows: 4 }"
-      type="textarea" placeholder="欢迎提问～" />
+    <el-button type="danger" round class="doneRep" v-show="pendingCount !== 0" @click="reInit"
+      >正在请求中数：{{ pendingCount }},终止所有请求</el-button
+    >
+    <el-input
+      ref="qInoutEl"
+      class="do-scrollbar-b chat-input"
+      v-model="textarea"
+      :autosize="{ minRows: 2, maxRows: 4 }"
+      type="textarea"
+      placeholder="欢迎提问～"
+    />
     <el-button type="primary" class="ml-10 submit-btn" @click="submit(null)">
       {{ '提交' }}
     </el-button>
   </div>
 
   <el-dialog v-model="centerDialogVisible" width="70%" center>
-    <div style="word-wrap:break-word;">
+    <div style="word-wrap: break-word">
       {{ dialogInput }}
     </div>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="centerDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogSubmit">
-          提交
-        </el-button>
+        <el-button type="primary" @click="dialogSubmit"> 提交 </el-button>
       </span>
     </template>
   </el-dialog>

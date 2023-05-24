@@ -5,7 +5,7 @@
 -->
 <script setup lang="ts" name="QuestList">
 import { ref } from 'vue'
-import { getLocalStorage, isMobile } from './utils'
+import { getLocalStorage, isMobile } from '../utils'
 
 const chatList = ref(getLocalStorage())
 const value = ref()
@@ -19,8 +19,14 @@ const isMobileV = ref(isMobile1)
 <template>
   <el-select v-model="value" placeholder="打开问题列表" filterable @change="onChange" style="height: 800px">
     <el-option class="option" v-for="(item, index) in chatList" :key="index" :label="item.question" :value="index">
-      <el-tooltip class="box-item" effect="dark" :content="item.question" :hide-after="0" placement="top"
-        v-if="!isMobileV">
+      <el-tooltip
+        class="box-item"
+        effect="dark"
+        :content="item.question"
+        :hide-after="0"
+        placement="top"
+        v-if="!isMobileV"
+      >
         {{ item.question }}
       </el-tooltip>
       <div v-else>

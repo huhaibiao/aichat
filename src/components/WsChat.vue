@@ -1,13 +1,14 @@
 <script lang="ts" setup name="WsChat">
 import RepLoading from './Loading.vue'
 import { ws, sendReq, handleFns, initWs, params } from './websocketChat'
-import { bytesJudge, getLocalStorage, mouseRightClick } from './utils'
+import { bytesJudge, getLocalStorage, mouseRightClick } from '../utils'
 import { onBeforeUnmount, onBeforeMount, onUnmounted, Ref, ref, onMounted } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 // import { marked } from 'marked';
 // import highlight from 'highlight.js';
 
 import 'highlight.js/styles/github.css'
+import { baseState, otherChatList } from '../store'
 const emit = defineEmits(['JLogin'])
 emit('JLogin')
 let selectedSpan = -1
@@ -214,6 +215,20 @@ handleFns.mesHandle = event => {
     //是回复流
     aiRepHandle(data)
   }
+
+  if (data.code === 1) {
+    //用户数
+    baseState.online = data.data
+  }
+
+  if (data.code === 2) {
+    //回复数
+    baseState.questions = data.data
+  }
+  if (data.code === 3) {
+    //其他回复
+    otherChatList.unshift(data.data)
+  }
 }
 
 handleFns.closeHandle = event => {
@@ -262,13 +277,13 @@ initWs()
     <div v-for="(item, index) of chatsList" :key="index">
       <div class="chat-item chat-item-user" style="position: relative">
         <div class="chat-item-rep mr-10 user">{{ item.question }}</div>
-        <div class="me square">我</div>
+        <div class="square me">我</div>
         <div class="time" style="position: absolute; bottom: -25px; right: 50px">
           <el-text type="info" size="small">{{ '时间:' + item.questionTime }}</el-text>
         </div>
       </div>
       <div class="chat-item" style="position: relative">
-        <div class="square">ai</div>
+        <div class="square" :class="{ isMobile: baseState.isMobile }">ai</div>
         <div class="chat-item-rep ml-10">
           <RepLoading v-if="!item.rep" />
           <span :class="index + 1 + ''">
@@ -295,7 +310,7 @@ initWs()
       placeholder="欢迎提问～"
     />
     <el-button type="primary" class="ml-10 submit-btn" @click="submit" :disabled="STATUS !== 0"
-      >{{ STATUS !== 0 ? '回复中' : '提交' }}<el-icon class="is-loading" v-if="STATUS !== 0"> <Loading /> </el-icon
+      >{{ STATUS !== 0 ? '回复中' : '提交' }}<el-icon class="is-loading" v-if="STATUS !== 0"> <IEpLoading /> </el-icon
     ></el-button>
   </div>
 
@@ -379,7 +394,7 @@ initWs()
       display: flex;
       align-items: center;
       white-space: pre-wrap;
-      // word-wrap: break-word;
+      word-break: break-all;
     }
 
     .user {
@@ -395,15 +410,23 @@ initWs()
       justify-content: center;
       color: #fff;
       background: #c0c4cc;
-
+      // background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+      // background-image: linear-gradient(to top, #a8edea 0%, #fed6e3 100%);
       min-width: 36px;
       height: 36px;
-      font-size: var(--el-avatar-text-size);
+      font-size: 18px;
       border-radius: 4px;
     }
 
+    .isMobile {
+      background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+    }
+
     .me {
+      background-image: none;
       background-color: #626aef;
+      color: #fff;
+      font-size: 18px;
     }
   }
 
@@ -430,12 +453,22 @@ initWs()
   padding: 0 10vw;
   padding-top: 20px;
   padding-bottom: 20px;
-  background-color: #f8f8fa;
+  // background-color: #f8f8fa;
+  background-color: #fff;
 
   .chat-input {
+    border-radius: 4px;
     :deep(.el-textarea__inner) {
-      box-shadow: none;
-      // box-shadow: 0px 0px 1px #888888;
+      background-image: linear-gradient(to right, #dfe9f399 0%, white 100%);
+      box-shadow: 0 0 0 1px #ffffff00;
+      transition: none;
+      // &:hover {
+      //   box-shadow: 0 0 0 1px var(--el-input-hover-border-color) inset;
+      // }
+      &:focus {
+        outline: 0;
+        box-shadow: 0 0 0 1px var(--el-input-focus-border-color) inset;
+      }
     }
   }
 
