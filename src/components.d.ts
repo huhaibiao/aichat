@@ -28,6 +28,8 @@ declare module '@vue/runtime-core' {
     HeadTip: typeof import('./components/HeadTip.vue')['default']
     IEpDArrowLeft: typeof import('~icons/ep/d-arrow-left')['default']
     IEpLoading: typeof import('~icons/ep/loading')['default']
+    IEpPointer: typeof import('~icons/ep/pointer')['default']
+    IEpPosition: typeof import('~icons/ep/position')['default']
     Loading: typeof import('./components/Loading.vue')['default']
     Login: typeof import('./components/Login.vue')['default']
     QuestList: typeof import('./components/QuestList.vue')['default']

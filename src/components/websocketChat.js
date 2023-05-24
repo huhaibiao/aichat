@@ -3,7 +3,7 @@
  * @Date: 2023-04-04 20:21:05
  */
 let IN_WS_URL = 'ws://18.216.251.165:8088'
-__APP_ENV__ && (IN_WS_URL = 'ws://192.168.124.7:8088/')
+// __APP_ENV__ && (IN_WS_URL = 'ws://192.168.124.7:8088/')
 if (location?.protocol.includes('https')) {
   IN_WS_URL = 'wss' + IN_WS_URL.slice(2)
 }
@@ -11,8 +11,8 @@ if (location?.protocol.includes('https')) {
 const codeList = [0, 2599]
 
 export const params = {
-  appId: 'G8CPjjcTqnNU4NjC',
-  sessionId: 'qbd4r6rahnxuazy5qoqd'
+  appId: 'sfggffeefegrgrfrfe',
+  sessionId: 'qdsfsfdgdfgddddqoqd'
 }
 
 /** ws的事件监听 */

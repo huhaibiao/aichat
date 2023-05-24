@@ -142,7 +142,9 @@ onMounted(() => {
 
 /** 断开重联 */
 const reInit = () => {
-  ws.close()
+  // ws.close()
+  const sendData = JSON.stringify({ stop: true })
+  sendReq(sendData)
   /** 这个地方是假状态 */
   STATUS.value = 0
 }
@@ -210,6 +212,7 @@ handleFns.mesHandle = event => {
     STATUS.value = 0
     chatsList[data.id].repTime = new Date().toLocaleString()
     saveLocalStorage(chatsList) //做防抖
+    return
   }
   if (!data.time) {
     //是回复流
