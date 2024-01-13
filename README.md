@@ -27,8 +27,7 @@ http://18.216.251.165/ai-chat
 
 # 测试用账户
 
-merchant1
-merchant1
+
 
 # 打包构建
 
