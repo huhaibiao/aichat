@@ -3,8 +3,6 @@
  * @Date: 2023-05-24 15:04:47
 -->
 <script lang="ts" setup name="WsChatOther">
-import { ws, sendReq, handleFns, initWs, params } from './websocketChat'
-import { onBeforeUnmount, onBeforeMount, onUnmounted, Ref, ref, onMounted } from 'vue'
 //只接收数据
 import { baseState, otherChatList } from '../store'
 

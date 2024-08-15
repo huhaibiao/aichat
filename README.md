@@ -78,3 +78,29 @@ merchant1
 
 - 问题和答案
 
+
+ai聊天页面，欢迎大家友好提问和使用
+
+前端开源地址：
+
+https://github.com/huhaibiao/aichat
+
+后端开源地址：
+
+https://github.com/huhaibiao/openai-api
+
+体验链接目前在前端开源readme介绍中
+
+前端功能：
+
+界面优化
+
+流式打字机效果
+
+后端服务：
+
+多人提问
+
+逻辑闭环
+
+共享聊天提问

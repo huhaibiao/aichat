@@ -6,7 +6,7 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
 const instance = axios.create({
-  baseURL: 'http://gptapi.jnnxtech.com'
+  baseURL: ''
 })
 
 // 添加响应拦截器

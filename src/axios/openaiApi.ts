@@ -1,5 +1,5 @@
 /*
- * @Author: huhaibiao huhaibiao@do-global.com
+ * @Author: huhaibiao
  * @Date: 2023-04-04 21:56:01
  */
 import axios from 'axios'

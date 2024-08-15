@@ -3,26 +3,23 @@
  * @Date: 2023-03-29 15:35:57
  * @Description: 
 -->
-<script setup>
+<script setup lang="ts">
 import { reactive, ref, toRef, watch } from 'vue'
-import {pendingCount} from './useRequest';
+import { pendingCount } from './useRequest'
 
+//@ts-ignore
 const mode = ref(__APP_ENV__)
-
 </script>
 
 <template>
   <div class="development" v-if="mode === 'development'">
-    <div>开发环境</div> 
+    <div>开发环境</div>
 
     <!-- <div>ws连接状态：{{ Model.ws.readyState }}</div> -->
-    <div>ws连接状态：{{  }}</div>
+    <div>ws连接状态：{{}}</div>
 
     <div>正在请求中数：{{ pendingCount }}</div>
-</div>
-
-
-
+  </div>
 </template>
 
 <style lang="less" scoped>
@@ -31,9 +28,9 @@ const mode = ref(__APP_ENV__)
   z-index: 2;
   right: 10px;
   top: 10px;
-//   min-width: 100px;
-padding: 5px;
-//   max-width: 150px;
+  //   min-width: 100px;
+  padding: 5px;
+  //   max-width: 150px;
   min-height: 30px;
   border-radius: 4px;
   background-color: rgba(0, 0, 0, 0.429);
@@ -42,7 +39,7 @@ padding: 5px;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-flex-direction: column;
+  flex-direction: column;
   color: #fff;
 }
 </style>
