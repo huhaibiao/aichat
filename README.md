@@ -11,6 +11,8 @@ ai chat
 
 http://18.216.251.165/ai-chat
 
+https://ai-chat-xi.vercel.app/
+
 目前 账号：huhaibiao 密码是：1
 
 界面介绍：
